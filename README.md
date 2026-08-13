@@ -7,7 +7,7 @@ DeepSeek Harness 的「对话口吻」切换插件(bundle)。用户可随时 `/v
 安装到某个 profile:
 
 ```sh
-dsh plugin --profile demo add dsh-voice
+dsh plugin --profile demo add @meomeo-dev/dsh-voice
 dsh --profile demo
 ```
 
@@ -18,6 +18,26 @@ dsh --profile demo
 /voice list     # 同上
 /voice ling     # 切换到「令」的口吻
 ```
+
+## 安装与 prepare 说明
+
+三种安装方式对「是否需要本地构建」的处理不同:
+
+| 方式 | 命令 | 是否构建 |
+|---|---|---|
+| npm 发布包(推荐) | `dsh plugin --profile demo add @meomeo-dev/dsh-voice` | 否,发布 tarball 已含 `lib/` |
+| gh/git 源码 | `dsh plugin --profile demo add github:meomeo-dev/dsh-voice#v0.1.0` | 是,拉源码后跑 `prepare` 编译 |
+
+`prepare` 脚本(`tsc -p tsconfig.json`)的存在原因:git 安装拉的是**源码而非构建产物**,必须靠 `prepare` 把 `src/` 编译成 `lib/`,否则插件无法加载。npm 发布包则不需要——`lib/` 已在打包时构建好并随 tarball 分发。
+
+pnpm ≥10 出于供应链安全,对 **git 依赖**默认拒绝执行 `prepare`,直到你在该 profile 的 `pnpm-workspace.yaml` 里显式放行。首次 `add github:...` 会失败并打印确切的 key,照做即可:
+
+```yaml
+allowBuilds:
+  dsh-voice@https://codeload.github.com/meomeo-dev/dsh-voice/tar.gz/<sha>: true
+```
+
+该放行等于「授权该包在安装时执行任意代码」,请只对你信任的包、并 pin 到具体 tag(`#v0.1.0`)而非裸分支。若不想让用户做这一步,请用 **npm 发布包**(推荐)或 tarball 分发——二者不含源码、不触发 allowBuilds。
 
 ## 自带口吻
 
@@ -68,6 +88,22 @@ examples:         # 场景示例(数组,每个 3–5 条对话)
 ```sh
 dsh-voice check [dir...]     # 校验 voice 文件形状
 dsh-voice migrate [dir...]   # 把旧版本 voice 文件原地迁移到当前版本(写回)
+```
+
+## 发布到 npm
+
+发布由 GitHub Actions 自动完成([`.github/workflows/release.yml`](.github/workflows/release.yml)),触发条件是「发布一个 GitHub Release」。首次使用需要一次性配置:
+
+1. 在 npm 注册并拥有 `@meomeo-dev` 这个 scope(同名用户或 org)。
+2. 在 npm 生成一个 **Automation / publish token**,复制它。
+3. 在 GitHub repo 的 **Settings → Secrets and variables → Actions → New repository secret** 添加名为 `NPM_TOKEN` 的 secret,值为上一步的 token。
+
+之后每次:**GitHub 上点 "Draft a new release" → 填 tag(如 `v0.1.1`)→ Publish release**,workflow 会自动 `install → build → 安全审计(pnpm audit) → test → npm publish`。发布前有任何一步失败(尤其安全审计)都会阻断发布。
+
+发布成功后可安装:
+
+```sh
+dsh plugin --profile demo add @meomeo-dev/dsh-voice
 ```
 
 ## 开发

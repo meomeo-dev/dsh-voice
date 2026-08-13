@@ -3,4 +3,4 @@
 # so the row activates once those services mount.
 - insert:
     - id: voice
-      name: dsh-voice
+      name: '@meomeo-dev/dsh-voice'

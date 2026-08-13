@@ -1,5 +1,5 @@
 {
-  "name": "dsh-voice",
+  "name": "@meomeo-dev/dsh-voice",
   "version": "0.1.0",
   "description": "Conversation-tone switcher bundle for DeepSeek Harness — ships the 令 (Ling) tone and a create-voice meta-skill.",
   "type": "module",
@@ -16,9 +16,13 @@
     "voice.schema.yaml",
     "cordis.patch.yml"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "prepare": "tsc -p tsconfig.json",
+    "clean": "node -e \"require('fs').rmSync('lib',{recursive:true,force:true})\"",
+    "build": "pnpm clean && tsc -p tsconfig.json",
+    "prepare": "pnpm clean && tsc -p tsconfig.json",
     "schema:gen": "node scripts/gen-schema.mjs",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"

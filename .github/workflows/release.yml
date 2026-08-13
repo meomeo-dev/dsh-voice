@@ -1,0 +1,47 @@
+name: release
+
+# 发布一个 GitHub Release(非 draft)即触发,把包发布到 npm。
+# 首次使用前需要在 repo Settings → Secrets → Actions 里加一个 npm token
+# (见 README「发布到 npm」),名称为 NPM_TOKEN。
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  # npm provenance:让 npm 校验「该包确实由此 GitHub Actions 构建」。
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      # 安全审计门禁:基于 npm advisory 数据库,高危/严重即失败、阻断发布。
+      - name: Security audit
+        run: pnpm audit --audit-level=high
+
+      - name: Test
+        run: pnpm test
+
+      - name: Publish
+        run: pnpm publish --no-git-checks --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
