@@ -2,6 +2,10 @@
   "name": "@meomeo-dev/dsh-voice",
   "version": "0.1.0",
   "description": "Conversation-tone switcher bundle for DeepSeek Harness — ships the 令 (Ling) tone and a create-voice meta-skill.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meomeo-dev/dsh-voice.git"
+  },
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
