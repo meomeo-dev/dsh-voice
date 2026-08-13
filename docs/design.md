@@ -30,22 +30,39 @@ settings(用户层) ──watch──▶ activeTone ──▶ voicePromptFor() �
 
 ## 3. voice 文件格式
 
-一个 `*.voice.yaml` 文件即一个口吻定义:
+一个 `*.voice.yaml` 文件即一个口吻定义。自 v2 起,`prompt` 不再是自由字符串,而是由结构化字段通过 Handlebars 模板拼接:
 
 ```yaml
-version: 1            # 缺省 0,由 migrate 升到当前版本
+version: 2            # 缺省 0,由 migrate 升到当前版本
 id: ling              # 必填,kebab-case,须与文件名 basename 一致
-label: 令 (Ling)      # 缺省回退到 id
+label: 令 (Ling)      # 空串回退到 id
 description: ...      # 一句话说明
-prompt: |             # 必填,面向模型的指导文本
+identity:             # 身份背景(对象)
+  role: 干员「令」(Ling)
+  background: 来自大炎的诗人……
+  address: 博士       # 角色对用户的称呼
+style: |              # 说话方式(字符串)
   ...
+examples:             # 场景示例(数组,每个 3–5 条对话)
+  - name: 场景一 · 登场接令
+    turns:
+      - speaker: 博士
+        text: ...
+template: ...         # 可选,自定义 Handlebars 模板覆盖默认拼接
 ```
+
+最终 `prompt` 由 `src/render.ts` 用 Handlebars 渲染:`你是{{identity.role}}。{{identity.background}}` + `【说话方式】` + `{{style}}` + `【场景示例】`(`examples` 非空时)。默认模板在 `src/voice-schema.ts` 的 `DEFAULT_TEMPLATE`,空 `template` 回退到它。
 
 形状由 `src/voice-schema.ts`(schemastery)校验,是单一真相源;`voice.schema.yaml` 是同一 schema 的 JSON Schema 表达,由 `pnpm schema:gen` 生成,供第三方工具与人类阅读。
 
 ### 版本与迁移
 
-`version` 字段为将来格式演进预留。`src/voice-file.ts` 维护一条迁移链 `MIGRATIONS`(key = 迁移前版本),加载时把任意历史版本连续升到 `CURRENT_VOICE_VERSION`(当前为 1)。当前唯一的迁移是 `0 → 1`(补 `version` 字段)。坏文件在发现阶段跳过并告警,不阻断整体。
+`version` 字段为格式演进预留。`src/voice-file.ts` 维护一条迁移链 `MIGRATIONS`(key = 迁移前版本),加载时把任意历史版本连续升到 `CURRENT_VOICE_VERSION`(当前为 2)。迁移链:
+
+- `0 → 1`:补 `version` 字段。
+- `1 → 2`:把 v1 的单一 `prompt` 字符串拆成 `identity` / `style` / `examples`(识别 `【说话方式】`/`【场景示例】` 标记;识别失败保守地把全文放进 `style`)。
+
+`dsh-voice migrate` 会把旧文件原地写回为当前版本。坏文件在发现阶段跳过并告警,不阻断整体。
 
 ## 4. voice 目录发现
 
@@ -66,7 +83,7 @@ prompt: |             # 必填,面向模型的指导文本
 
 1. **搜集角色**——识别目标,搜索权威档案与真实台词原文。
 2. **分析说话方式**——从台词归纳 4–8 条可执行风格规则,附一条「不得因文害意」硬约束。
-3. **写口吻文本**——`prompt` 三段式:身份背景 + 说话方式 + 10 个场景示例(每个 3–5 条,场景互不相同)。
+3. **写口吻文本**——结构化字段:`identity`(role/background/address)+ `style` + `examples`(10 个场景,每个 3–5 条,场景互不相同),由 Handlebars 模板拼接成最终 prompt。
 4. **落盘校验**——写 `<id>.voice.yaml` 到 voice 目录,`dsh-voice check` 校验。
 
 ## 6. 检查/迁移工具

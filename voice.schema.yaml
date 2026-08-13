@@ -1,5 +1,5 @@
 # Generated from src/voice-schema.ts by scripts/gen-schema.mjs — do not edit by hand.
-uid: 14
+uid: 40
 refs:
   "3":
     type: number
@@ -25,7 +25,72 @@ refs:
     meta:
       min: 1
       required: true
-  "14":
+  "16":
+    type: string
+    meta:
+      min: 1
+      required: true
+  "18":
+    type: string
+    meta:
+      default: 用户
+  "19":
+    type: object
+    meta:
+      default: {}
+    dict:
+      role: 13
+      background: 16
+      address: 18
+  "22":
+    type: string
+    meta:
+      min: 1
+      required: true
+  "25":
+    type: string
+    meta:
+      min: 1
+      required: true
+  "28":
+    type: string
+    meta:
+      min: 1
+      required: true
+  "31":
+    type: string
+    meta:
+      min: 1
+      required: true
+  "32":
+    type: object
+    meta:
+      default: {}
+    dict:
+      speaker: 28
+      text: 31
+  "34":
+    type: array
+    meta:
+      default: []
+    inner: 32
+  "35":
+    type: object
+    meta:
+      default: {}
+    dict:
+      name: 25
+      turns: 34
+  "37":
+    type: array
+    meta:
+      default: []
+    inner: 35
+  "39":
+    type: string
+    meta:
+      default: ""
+  "40":
     type: object
     meta:
       default: {}
@@ -34,4 +99,7 @@ refs:
       id: 6
       label: 8
       description: 10
-      prompt: 13
+      identity: 19
+      style: 22
+      examples: 37
+      template: 39

@@ -28,16 +28,27 @@ dsh --profile demo
 
 ## voice 文件与目录
 
-一个口吻是一个 `*.voice.yaml` 文件:
+一个口吻是一个 `*.voice.yaml` 文件,最终 prompt 由 Handlebars 模板从结构化字段拼接而成:
 
 ```yaml
-version: 1
+version: 2
 id: ling          # kebab-case,须与文件名一致
 label: 令 (Ling)
 description: 炎国诗人
-prompt: |
-  <身份背景 + 说话方式 + 场景示例>
+identity:         # 身份背景(对象)
+  role: 干员「令」(Ling)
+  background: 来自大炎的诗人……
+  address: 博士   # 角色对用户的称呼
+style: |          # 说话方式(字符串)
+  - 用古典诗词化的中文应答……
+examples:         # 场景示例(数组,每个 3–5 条对话)
+  - name: 场景一 · 登场接令
+    turns:
+      - speaker: 博士
+        text: 令,帮我看看这个项目。
 ```
+
+`template` 字段可用自定义 Handlebars 模板覆盖默认拼接;`voice.schema.yaml` 是格式的 JSON Schema 表达。
 
 插件从以下目录发现(同名时后者覆盖前者):
 
@@ -56,7 +67,7 @@ prompt: |
 
 ```sh
 dsh-voice check [dir...]     # 校验 voice 文件形状
-dsh-voice migrate [dir...]   # 报告并校验到当前格式版本
+dsh-voice migrate [dir...]   # 把旧版本 voice 文件原地迁移到当前版本(写回)
 ```
 
 ## 开发
