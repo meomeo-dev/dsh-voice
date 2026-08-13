@@ -1,0 +1,6 @@
+# The dsh-voice bundle layer: one insert row for the conversation-tone plugin.
+# The plugin injects `systemPrompt` and `commands` (both shipped in dsh-base),
+# so the row activates once those services mount.
+- insert:
+    - id: voice
+      name: dsh-voice

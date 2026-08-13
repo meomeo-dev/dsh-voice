@@ -1,0 +1,53 @@
+{
+  "name": "dsh-voice",
+  "version": "0.1.0",
+  "description": "Conversation-tone switcher bundle for DeepSeek Harness — ships the 令 (Ling) tone and a create-voice meta-skill.",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "bin": {
+    "dsh-voice": "bin/dsh-voice.mjs"
+  },
+  "files": [
+    "lib",
+    "bin",
+    "voices",
+    "skill",
+    "voice.schema.yaml",
+    "cordis.patch.yml"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "tsc -p tsconfig.json",
+    "schema:gen": "node scripts/gen-schema.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "yaml": "^2.5.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.0.0",
+    "@deepseek-ai/dsh-commands": ">=0.1.0-rc.0",
+    "@deepseek-ai/dsh-settings": ">=0.1.0-rc.0",
+    "@deepseek-ai/dsh-skill": ">=0.1.0-rc.0",
+    "@deepseek-ai/dsh-system-prompt": ">=0.1.0-rc.0",
+    "@deepseek-ai/schemastery": ">=3.18.0"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.0.1",
+    "@deepseek-ai/dsh-commands": "0.1.0-rc.6",
+    "@deepseek-ai/dsh-settings": "0.1.0-rc.6",
+    "@deepseek-ai/dsh-skill": "0.1.0-rc.6",
+    "@deepseek-ai/dsh-system-prompt": "0.1.0-rc.6",
+    "@deepseek-ai/schemastery": "3.18.1",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

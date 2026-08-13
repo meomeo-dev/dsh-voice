@@ -1,0 +1,6 @@
+version: 1
+id: default
+label: Default
+description: 中性、直接的口吻。
+prompt: |
+  Respond naturally and clearly.

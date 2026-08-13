@@ -1,0 +1,37 @@
+# Generated from src/voice-schema.ts by scripts/gen-schema.mjs — do not edit by hand.
+uid: 14
+refs:
+  "3":
+    type: number
+    meta:
+      step: 1
+      min: 0
+      default: 0
+  "6":
+    type: string
+    meta:
+      min: 1
+      required: true
+  "8":
+    type: string
+    meta:
+      default: ""
+  "10":
+    type: string
+    meta:
+      default: ""
+  "13":
+    type: string
+    meta:
+      min: 1
+      required: true
+  "14":
+    type: object
+    meta:
+      default: {}
+    dict:
+      version: 3
+      id: 6
+      label: 8
+      description: 10
+      prompt: 13
