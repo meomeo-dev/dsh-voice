@@ -1,5 +1,9 @@
 # dsh-voice
 
+<p align="center">
+  <img src="docs/blog_post/hero-image.png" alt="Build your dsh Hall of Fame" width="100%">
+</p>
+
 <table>
   <tr>
     <td align="center"><img src="docs/_assets/charlie-munger.png" alt="Charlie Munger" width="100%"><br><code>charlie-munger</code></td>
@@ -104,6 +108,18 @@ examples:               # 场景示例(数组,每个 3–5 条对话)
 ## create-voice 元技能
 
 模型或用户可调用 `create-voice` 技能,按「搜集角色 → 分析说话方式 → 写口吻文本 → 落盘校验」的流程新建口吻文件。也可直接参考 [skill/create-voice/SKILL.md](skill/create-voice/SKILL.md)。
+
+在会话中直接发指令即可创建新 voice,三种模板(均为「特定角色」,锚定权威素材与真实台词):
+
+```sh
+/create-voice <某游戏>中的<角色名>     # 游戏角色
+/create-voice <某动漫>中的<角色名>     # 动漫角色
+/create-voice <某书>中的<角色名>       # 文学作品角色
+```
+
+其中 `<…>` 为占位符,按需替换。  
+
+创建时技能会先搜集该角色的权威档案与真实台词(以官方/原著为准),再从台词归纳说话方式,落盘为 `*.voice.yaml`。
 
 ## 校验与迁移工具
 
