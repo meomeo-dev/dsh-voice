@@ -17,6 +17,12 @@ Use this skill to author a new `*.voice.yaml` tone file and place it in a `voice
 
 From the gathered lines, distill 4–8 concrete, executable style rules — not vague adjectives. For each rule, name the observable feature (sentence rhythm, repeated imagery, register, address terms) and, where possible, ground it in an actual quoted line. Add one hard rule at the end: the tone must stay accurate and useful — it never overrides correctness, safety, or executability.
 
+**Choosing which axes to analyze — pick the right reference (or none):**
+
+- If the target is a **specific character / prose style / work** (干员「令」, a named author's style, a game/anime character), do **not** pull in the style-dimension taxonomies to *define* the persona — that over-hits and produces an irrelevant tone. Derive rules from the gathered authoritative material. You may use the taxonomies only for **post-hoc calibration**: map the rules you already derived onto the axes to catch a missed observable feature.
+- If the target is an **abstract / general speaking style** with no named character (e.g. "a concise, rigorous coding assistant", "a friendly helper", "an academic reviewer"), consult [`references/style-dimensions-conversation.md`](references/style-dimensions-conversation.md) to pick the relevant axes and write concrete rules from them.
+- If the target is an **abstract code-writing style** (how the agent *writes/explains code*, not a persona), consult [`references/style-dimensions-code.md`](references/style-dimensions-code.md). It is orthogonal to the conversation taxonomy: one governs "how code is written", the other governs "how words are spoken".
+
 ## 3. Write the structured tone
 
 The file is **structured**: the final prompt is assembled by a Handlebars template from three fields. Do not write a single free-form `prompt` string.
@@ -61,3 +67,10 @@ Constraints:
 - The whole file is valid YAML; indent the `prompt`-replacing fields consistently.
 
 After writing, verify with `dsh-voice check <dir>` (or `pnpm dsh-voice check <dir>`), and tell the user they can switch to it with `/voice <id>`.
+
+## References
+
+Two style-dimension taxonomies (from `html_ft_llm_any_style`) live alongside this skill. They are **abstract-style calibration instruments, not persona definitions** — consult them only for general/code style, never to define a specific character/prose/work voice.
+
+- [`references/style-dimensions-conversation.md`](references/style-dimensions-conversation.md) — 通用对话风格维度量表 (40 axes, 0–5). Use for an abstract **conversation** tone (e.g. concise-rigorous assistant, friendly helper, academic reviewer).
+- [`references/style-dimensions-code.md`](references/style-dimensions-code.md) — 代码风格维度量表 (50 axes, 0–5). Use for an abstract **code-writing** style (formatting, naming, comments, structure, markers, tests).
