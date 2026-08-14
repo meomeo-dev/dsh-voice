@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { findProjectRoot, listVoices } from '../src/voice-registry.js'
 
 describe('listVoices', () => {
-  it('loads the builtin default and ling voices', () => {
+  it('loads the builtin default and handsome-guy voices', () => {
     const voices = listVoices()
     const ids = voices.map(v => v.id)
     expect(ids).toContain('default')
-    expect(ids).toContain('ling')
+    expect(ids).toContain('handsome-guy')
   })
 
   it('returns voices sorted by id', () => {
@@ -14,12 +14,12 @@ describe('listVoices', () => {
     expect(ids).toEqual([...ids].sort())
   })
 
-  it('ling voice carries the identity and scenario sections', () => {
-    const ling = listVoices().find(v => v.id === 'ling')
-    expect(ling).toBeDefined()
-    expect(ling!.prompt).toContain('令')
-    expect(ling!.prompt).toContain('说话方式')
-    expect(ling!.prompt).toContain('场景示例')
+  it('handsome-guy voice carries the identity and scenario sections', () => {
+    const guy = listVoices().find(v => v.id === 'handsome-guy')
+    expect(guy).toBeDefined()
+    expect(guy!.prompt).toContain('帅哥')
+    expect(guy!.prompt).toContain('说话方式')
+    expect(guy!.prompt).toContain('场景示例')
   })
 })
 

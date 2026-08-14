@@ -34,19 +34,19 @@ settings(用户层) ──watch──▶ activeTone ──▶ voicePromptFor() �
 
 ```yaml
 version: 2            # 缺省 0,由 migrate 升到当前版本
-id: ling              # 必填,kebab-case,须与文件名 basename 一致
-label: 令 (Ling)      # 空串回退到 id
+id: sun-wukong        # 必填,kebab-case,须与文件名 basename 一致
+label: 孙悟空 (Sun Wukong)  # 空串回退到 id
 description: ...      # 一句话说明
 identity:             # 身份背景(对象)
-  role: 干员「令」(Ling)
-  background: 来自大炎的诗人……
-  address: 博士       # 角色对用户的称呼
+  role: 齐天大圣·美猴王·孙行者
+  background: 《西游记》原著中的孙悟空……
+  address: 师父       # 角色对用户的称呼
 style: |              # 说话方式(字符串)
   ...
 examples:             # 场景示例(数组,每个 3–5 条对话)
-  - name: 场景一 · 登场接令
+  - name: 初见 · 五行山下拜师
     turns:
-      - speaker: 博士
+      - speaker: 师父
         text: ...
 template: ...         # 可选,自定义 Handlebars 模板覆盖默认拼接
 ```
@@ -79,7 +79,7 @@ template: ...         # 可选,自定义 Handlebars 模板覆盖默认拼接
 
 ## 5. create-voice 元技能
 
-`skill/create-voice/SKILL.md` 是标准的 SKILL.md(带 frontmatter),插件把它注册进 `ctx.skills`(runtime skill,`modelInvocable` + `userInvocable`)。流程是把「初始化令」那套总结成可复用 SOP:
+`skill/create-voice/SKILL.md` 是标准的 SKILL.md(带 frontmatter),插件把它注册进 `ctx.skills`(runtime skill,`modelInvocable` + `userInvocable`)。流程是把「新建口吻」那套总结成可复用 SOP:
 
 1. **搜集角色**——识别目标,搜索权威档案与真实台词原文。
 2. **分析说话方式**——从台词归纳 4–8 条可执行风格规则,附一条「不得因文害意」硬约束。
@@ -102,7 +102,7 @@ dsh-voice/
 ├── package.json          # dsh.bundle + bin + peer 依赖
 ├── cordis.patch.yml      # bundle 配置层
 ├── voice.schema.yaml     # 生成的 JSON Schema
-├── voices/               # 内置 voice(default、ling)
+├── voices/               # 内置 voice(default、sun-wukong、handsome-guy、pretty-girl、friendly-rigorous、strict-code-reviewer)
 ├── skill/create-voice/SKILL.md  # 元技能
 ├── bin/dsh-voice.mjs     # check/migrate CLI
 ├── src/
@@ -132,7 +132,7 @@ dsh-voice/
 ## 9. 验收标准(AC)
 
 1. 无参 `/voice` 显示当前口吻与可用列表,当前项标注 `(current)`。
-2. `/voice ling` 切换后,下一次 assemble 渲染的 system prompt 含令的口吻文本。
+2. `/voice sun-wukong` 切换后,下一次 assemble 渲染的 system prompt 含孙悟空的口吻文本。
 3. `/voice 未知id` 返回 `kind: 'error'`,并列出可用 id。
 4. 未知/空口吻 id 回退到默认口吻,不抛错。
 5. 切换持久化到 settings 用户层,重启后仍生效。

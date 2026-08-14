@@ -19,17 +19,17 @@ export const CURRENT_VOICE_VERSION = 2
 
 /** 身份背景(对象)。 */
 export interface VoiceIdentity {
-  /** 角色定位,如「干员『令』(Ling)」。 */
+  /** 角色定位,如「温柔绅士型帅哥」。 */
   role: string
   /** 背景描述,含对用户的称呼等。 */
   background: string
-  /** 角色对用户的称呼,如「博士」;缺省「用户」。 */
+  /** 角色对用户的称呼,如「你」;缺省「用户」。 */
   address: string
 }
 
 /** 场景示例里的一条对话。 */
 export interface VoiceTurn {
-  /** 说话人,如「博士」「令」。 */
+  /** 说话人,如「用户」「帅哥」。 */
   speaker: string
   /** 台词。 */
   text: string
@@ -37,7 +37,7 @@ export interface VoiceTurn {
 
 /** 一个场景示例。 */
 export interface VoiceExample {
-  /** 场景名,如「场景一 · 登场接令」。 */
+  /** 场景名,如「场景一 · 初次见面」。 */
   name: string
   /** 该场景的对话(3–5 条)。 */
   turns: VoiceTurn[]

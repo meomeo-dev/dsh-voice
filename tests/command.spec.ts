@@ -14,15 +14,15 @@ describe('parseVoiceCommand', () => {
   })
 
   it('parses a tone id, lowercased', () => {
-    expect(parseVoiceCommand('Ling')).toEqual({ kind: 'set', id: 'ling' })
+    expect(parseVoiceCommand('Handsome-Guy')).toEqual({ kind: 'set', id: 'handsome-guy' })
     expect(parseVoiceCommand('  concise ')).toEqual({ kind: 'set', id: 'concise' })
   })
 })
 
 describe('listVoicesText', () => {
   it('marks the active voice', () => {
-    const text = listVoicesText(listVoices(), 'ling')
-    expect(text).toContain('ling')
+    const text = listVoicesText(listVoices(), 'handsome-guy')
+    expect(text).toContain('handsome-guy')
     expect(text).toContain('(current)')
   })
 })

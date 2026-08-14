@@ -7,9 +7,9 @@ const voices = listVoices()
 
 describe('voicePromptFor', () => {
   it('returns the active voice prompt', () => {
-    const ling = voices.find(v => v.id === 'ling')
-    expect(ling).toBeDefined()
-    expect(voicePromptFor(voices, 'ling')).toBe(ling!.prompt)
+    const guy = voices.find(v => v.id === 'handsome-guy')
+    expect(guy).toBeDefined()
+    expect(voicePromptFor(voices, 'handsome-guy')).toBe(guy!.prompt)
   })
 
   it('falls back to the default voice for an unknown id', () => {
