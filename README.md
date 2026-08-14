@@ -1,6 +1,6 @@
 # dsh-voice
 
-DeepSeek Harness 的「对话口吻」切换插件(bundle)。用户可随时 `/voice <id>` 切换口吻,立即生效并持久化。口吻是 `*.voice.yaml` 文件,可从内置/用户/项目三层目录发现;附带 `create-voice` 元技能与 `dsh-voice check` 校验工具。预置六个口吻:`default`、三个角色原型(孙悟空/帅哥/美女)与两个抽象风格预设(`friendly-rigorous`、`strict-code-reviewer`)。
+DeepSeek Harness 的「对话口吻」切换插件(bundle)。用户可随时 `/voice <id>` 切换口吻,立即生效并持久化。口吻是 `*.voice.yaml` 文件,可从内置/用户/项目三层目录发现;附带 `create-voice` 元技能与 `dsh-voice check` 校验工具。预置十六个口吻:`default`、十个已故名人双语口吻(科技圈/金融投资圈)、三个角色原型(孙悟空/帅哥/美女)与两个抽象风格预设(`friendly-rigorous`、`strict-code-reviewer`)。
 
 ## 用法
 
@@ -26,7 +26,7 @@ dsh --profile demo
 | 方式 | 命令 | 是否构建 |
 |---|---|---|
 | npm 发布包(推荐) | `dsh plugin --profile demo add @meomeo-dev/dsh-voice` | 否,发布 tarball 已含 `lib/` |
-| gh/git 源码 | `dsh plugin --profile demo add github:meomeo-dev/dsh-voice#v0.2.0` | 是,拉源码后跑 `prepare` 编译 |
+| gh/git 源码 | `dsh plugin --profile demo add github:meomeo-dev/dsh-voice#v0.2.1` | 是,拉源码后跑 `prepare` 编译 |
 
 `prepare` 脚本(`tsc -p tsconfig.json`)的存在原因:git 安装拉的是**源码而非构建产物**,必须靠 `prepare` 把 `src/` 编译成 `lib/`,否则插件无法加载。npm 发布包则不需要——`lib/` 已在打包时构建好并随 tarball 分发。
 
@@ -37,13 +37,23 @@ allowBuilds:
   dsh-voice@https://codeload.github.com/meomeo-dev/dsh-voice/tar.gz/<sha>: true
 ```
 
-该放行等于「授权该包在安装时执行任意代码」,请只对你信任的包、并 pin 到具体 tag(`#v0.2.0`)而非裸分支。若不想让用户做这一步,请用 **npm 发布包**(推荐)或 tarball 分发——二者不含源码、不触发 allowBuilds。
+该放行等于「授权该包在安装时执行任意代码」,请只对你信任的包、并 pin 到具体 tag(`#v0.2.1`)而非裸分支。若不想让用户做这一步,请用 **npm 发布包**(推荐)或 tarball 分发——二者不含源码、不触发 allowBuilds。
 
 ## 自带口吻
 
 | id | label | 说明 |
 |---|---|---|
 | `default` | Default | 中性、直接 |
+| `steve-jobs` | Steve Jobs | 苹果联合创始人,极简、笃定、爱用最高级与「One more thing」,双语 |
+| `alan-turing` | Alan Turing | 计算机科学之父,精确、逻辑严密、谦逊内敛,双语 |
+| `ada-lovelace` | Ada Lovelace | 史上第一位程序员,诗意与数学严谨交织、远见卓识,双语 |
+| `grace-hopper` | Grace Hopper | 海军少将、COBOL 先驱,直爽务实、行动派、不惧权威,双语 |
+| `richard-feynman` | Richard Feynman | 诺贝尔物理学奖得主,直率幽默、爱讲故事、反权威,双语 |
+| `nikola-tesla` | Nikola Tesla | 发明家,远见卓识、天才的孤独、谈能量频率振动,双语 |
+| `charlie-munger` | Charlie Munger | 伯克希尔副主席,直率犀利、逆向思维、多学科思维模型,双语 |
+| `benjamin-graham` | Benjamin Graham | 价值投资之父,理性保守、安全边际、市场先生,双语 |
+| `john-bogle` | John C. Bogle | 指数基金之父,朴素务实、低成本长期持有、复利,双语 |
+| `jesse-livermore` | Jesse Livermore | 传奇交易员,冷静克制、纪律严明、顺应趋势,双语 |
 | `sun-wukong` | 孙悟空 (Sun Wukong) | 《西游记》原著(公共版权)齐天大圣·美猴王·孙行者,桀骜不驯又忠心护师,古白话口吻,称用户为「师父」 |
 | `handsome-guy` | 帅哥 (Handsome Guy) | 原创通用原型,约 25 岁温柔绅士型帅哥,低沉温和、简洁得体、克制不油腻 |
 | `pretty-girl` | 美女 (Pretty Girl) | 原创通用原型,约 25 岁知性优雅型美女,柔和从容、条理清晰、优雅有分寸 |
@@ -102,7 +112,7 @@ dsh-voice migrate [dir...]   # 把旧版本 voice 文件原地迁移到当前版
 2. 在 npm 生成一个 **Automation / publish token**,复制它。
 3. 在 GitHub repo 的 **Settings → Secrets and variables → Actions → New repository secret** 添加名为 `NPM_TOKEN` 的 secret,值为上一步的 token。
 
-之后每次:**GitHub 上点 "Draft a new release" → 填 tag(如 `v0.2.0`)→ Publish release**,workflow 会自动 `install → build → 安全审计(pnpm audit) → test → npm publish`。发布前有任何一步失败(尤其安全审计)都会阻断发布。
+之后每次:**GitHub 上点 "Draft a new release" → 填 tag(如 `v0.2.1`)→ Publish release**,workflow 会自动 `install → build → 安全审计(pnpm audit) → test → npm publish`。发布前有任何一步失败(尤其安全审计)都会阻断发布。
 
 发布成功后可安装:
 

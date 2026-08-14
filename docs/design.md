@@ -102,7 +102,7 @@ dsh-voice/
 ├── package.json          # dsh.bundle + bin + peer 依赖
 ├── cordis.patch.yml      # bundle 配置层
 ├── voice.schema.yaml     # 生成的 JSON Schema
-├── voices/               # 内置 voice(default、sun-wukong、handsome-guy、pretty-girl、friendly-rigorous、strict-code-reviewer)
+├── voices/               # 内置 voice(default + 10 个已故名人双语 + sun-wukong/handsome-guy/pretty-girl + friendly-rigorous/strict-code-reviewer)
 ├── skill/create-voice/SKILL.md  # 元技能
 ├── bin/dsh-voice.mjs     # check/migrate CLI
 ├── src/
