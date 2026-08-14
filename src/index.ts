@@ -8,6 +8,7 @@
  */
 
 import { readFileSync } from 'node:fs'
+import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
@@ -40,6 +41,9 @@ const SCHEMA: z<VoiceSettings> = z.object({
 
 /** create-voice 元技能文件(随包发布,插件编译到 lib/ 后向上取包根)。 */
 const CREATE_VOICE_SKILL_PATH = fileURLToPath(new URL('../skill/create-voice/SKILL.md', import.meta.url))
+
+/** create-voice 技能目录;作为 resourceBase,让 SKILL.md 里的 `references/…` 相对路径可解析。 */
+const CREATE_VOICE_SKILL_DIR = dirname(CREATE_VOICE_SKILL_PATH)
 
 /** 安全地转成可读字符串。 */
 function describeError(error: unknown): string {
@@ -125,6 +129,7 @@ export function apply(ctx: Context): void {
       name: skill.name,
       description: skill.description,
       source: 'bundled',
+      resourceBase: { kind: 'directory', path: CREATE_VOICE_SKILL_DIR },
       invocation: { modelInvocable: true, userInvocable: true },
       content: skill.content,
     })
