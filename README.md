@@ -1,5 +1,13 @@
 # dsh-voice
 
+<table>
+  <tr>
+    <td align="center"><img src="docs/_assets/charlie-munger.png" alt="Charlie Munger" width="100%"><br><code>charlie-munger</code></td>
+    <td align="center"><img src="docs/_assets/steve-jobs.png" alt="Steve Jobs" width="100%"><br><code>steve-jobs</code></td>
+    <td align="center"><img src="docs/_assets/sun-wukong.png" alt="Sun Wukong" width="100%"><br><code>sun-wukong</code></td>
+  </tr>
+</table>
+
 DeepSeek Harness 的「对话口吻」切换插件(bundle)。用户可随时 `/voice <id>` 切换口吻,立即生效并持久化。口吻是 `*.voice.yaml` 文件,可从内置/用户/项目三层目录发现;附带 `create-voice` 元技能与 `dsh-voice check` 校验工具。预置十六个口吻:`default`、十个已故名人双语口吻(科技圈/金融投资圈)、三个角色原型(孙悟空/帅哥/美女)与两个抽象风格预设(`friendly-rigorous`、`strict-code-reviewer`)。
 
 ## 用法
