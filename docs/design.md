@@ -114,6 +114,7 @@ dsh-voice/
 │   ├── command.ts        # /voice 解析与展示(纯函数)
 │   ├── switch-detect.ts  # 切换检测:折叠前后生效 voice 对比(纯函数)
 │   ├── switch-reminder.ts# 切换提醒文案 + agent.inject 注入(下一 turn 的 user 消息)
+│   ├── service.ts        # ctx.voice 选择解析服务(暴露给其他 bundle 软读生效 voice)
 │   └── skill-md.ts       # SKILL.md frontmatter 解析
 ├── scripts/gen-schema.mjs  # 生成 voice.schema.yaml
 ├── tests/

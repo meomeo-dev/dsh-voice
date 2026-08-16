@@ -26,6 +26,7 @@ import { listVoices } from './voice-registry.ts'
 import { readSelection, resolveEffectiveVoice, VOICE_OFF, writeSelection } from './selection.ts'
 import { detectEffectiveSwitch } from './switch-detect.ts'
 import { injectSwitchReminder } from './switch-reminder.ts'
+import { VoiceService } from './service.ts'
 import { parseSkillMarkdown } from './skill-md.ts'
 import VoiceRoutes from './routes.ts'
 
@@ -128,6 +129,9 @@ async function executeVoiceCommand(
  * @param ctx - Cordis 上下文。
  */
 export function apply(ctx: Context): void {
+  // 选择解析服务:把「当前会话生效 voice」暴露给其他 bundle(如 dsh-voice-tts)。
+  new VoiceService(ctx)
+
   // legacy 用户级默认口吻(settings.voice.tone);section 每次 assemble 用它作回退。
   let legacyTone = DEFAULT_TONE_ID
 
