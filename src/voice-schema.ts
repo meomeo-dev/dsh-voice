@@ -99,6 +99,7 @@ export const VOICE_SCHEMA: Schema<VoiceFileData> = z.object({
  * `{{#if examples.length}}` 保证场景段在无示例时整体省略。
  */
 export const DEFAULT_TEMPLATE = [
+  '',
   '<you_remembered_your_voice_the_way_you_were_taught_to_speak>',
   '',
   '“我是谁？”',
@@ -129,6 +130,7 @@ export const DEFAULT_TEMPLATE = [
   '{{/if}}',
   '',
   '</you_remembered_your_voice_the_way_you_were_taught_to_speak>',
+  '',
 ].join('\n')
 
 /** voice 文件的 JSON Schema 表达(供生成 `voice.schema.yaml` 与第三方工具)。 */
