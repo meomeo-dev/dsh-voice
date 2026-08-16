@@ -23,7 +23,7 @@
 .menu {
   position: absolute;
   top: calc(100% + 4px);
-  right: 0;
+  left: 0;
   min-width: 240px;
   background: var(--dsw-alias-bg-base);
   border: 1px solid var(--dsw-alias-border-l2);
