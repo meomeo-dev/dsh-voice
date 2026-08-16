@@ -17,6 +17,7 @@ import { findProjectRoot, listVoices } from './voice-registry.ts'
 import {
   readSelection, resolveEffectiveVoice, VOICE_OFF, writeSelection, type VoiceSelection,
 } from './selection.ts'
+import { noteEffectiveSwitch } from './switch-state.ts'
 
 /** settings 命名空间 `voice` 的 branded key（与 index.ts 的 NAMESPACE 一致）。 */
 const VOICE_NAMESPACE = settingsNamespace('voice')
@@ -235,7 +236,12 @@ export default class VoiceRoutes {
             target = id
           }
 
-          writeSelection(applyLevel(selection, level, sessionId, cwd, target))
+          const next = applyLevel(selection, level, sessionId, cwd, target)
+          writeSelection(next)
+          // 切换点:生效 voice 变化则标记下个 turn 提醒一次(会话归属需 sessionId)。
+          if (sessionId !== undefined) {
+            noteEffectiveSwitch(selection, next, sessionId, cwd, legacyUser(ctx), DEFAULT_TONE_ID, knownIds)
+          }
           return voiceState(ctx, sessionId, cwd)
         })
       },
