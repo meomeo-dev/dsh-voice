@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { listVoicesText, parseVoiceCommand } from '../src/command.js'
-import { listVoices } from '../src/voice-registry.js'
+import { listVoicesText, parseVoiceCommand } from '../src/command.ts'
+import { listVoices } from '../src/voice-registry.ts'
 
 describe('parseVoiceCommand', () => {
   it('treats empty input as show', () => {

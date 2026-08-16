@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { voicePromptFor } from '../src/section.js'
-import { DEFAULT_TONE_ID } from '../src/tones.js'
-import { listVoices } from '../src/voice-registry.js'
+import { voicePromptFor } from '../src/section.ts'
+import { DEFAULT_TONE_ID } from '../src/tones.ts'
+import { listVoices } from '../src/voice-registry.ts'
 
 const voices = listVoices()
 

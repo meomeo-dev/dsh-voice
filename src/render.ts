@@ -4,8 +4,8 @@
  */
 
 import Handlebars from 'handlebars'
-import { DEFAULT_TEMPLATE } from './voice-schema.js'
-import type { VoiceFileData } from './voice-schema.js'
+import { DEFAULT_TEMPLATE } from './voice-schema.ts'
+import type { VoiceFileData } from './voice-schema.ts'
 
 /**
  * 渲染一个 voice 的完整口吻指导文本。

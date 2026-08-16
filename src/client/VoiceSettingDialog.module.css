@@ -1,0 +1,42 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.label {
+  flex: 0 0 auto;
+  min-width: 96px;
+  font-size: 13px;
+  color: var(--ds-label-secondary, #61666b);
+}
+
+.select {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  padding: 6px 10px;
+  border: 1px solid var(--ds-border-l2, rgba(0, 0, 0, 0.1));
+  border-radius: 6px;
+  background: var(--ds-bg-base, #fff);
+  color: var(--ds-label-primary, #0f1115);
+}
+
+.effective {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--ds-label-caption, #adb2b8);
+}
+
+.error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ds-error, #ec1313);
+}
+
+.empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ds-label-caption, #adb2b8);
+}

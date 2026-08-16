@@ -3,8 +3,8 @@
  * @module dsh-voice/section
  */
 
-import type { VoiceFile } from './voice-schema.js'
-import { DEFAULT_TONE_ID } from './tones.js'
+import type { VoiceFile } from './voice-schema.ts'
+import { DEFAULT_TONE_ID } from './tones.ts'
 
 /**
  * 由当前生效口吻 id 得到该口吻的 prompt 文本。

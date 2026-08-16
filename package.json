@@ -1,14 +1,19 @@
 {
   "name": "@meomeo-dev/dsh-voice",
   "version": "0.2.1",
-  "description": "Conversation-tone switcher bundle for DeepSeek Harness — ships the 令 (Ling) tone and a create-voice meta-skill.",
+  "description": "Conversation-tone switcher bundle for DeepSeek Harness — ships the 令 (Ling) tone, a create-voice meta-skill, and a web UI for three-level (session/workspace/user) voice switching.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/meomeo-dev/dsh-voice.git"
   },
   "type": "module",
   "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
   "bin": {
     "dsh-voice": "bin/dsh-voice.mjs"
   },
@@ -25,8 +30,8 @@
   },
   "scripts": {
     "clean": "node -e \"require('fs').rmSync('lib',{recursive:true,force:true})\"",
-    "build": "pnpm clean && tsc -p tsconfig.json",
-    "prepare": "pnpm clean && tsc -p tsconfig.json",
+    "build": "pnpm clean && tsdown",
+    "prepare": "pnpm clean && tsdown",
     "schema:gen": "node scripts/gen-schema.mjs",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
@@ -51,12 +56,28 @@
     "@deepseek-ai/dsh-system-prompt": "0.1.0-rc.6",
     "@deepseek-ai/schemastery": "3.18.1",
     "@types/node": "^22.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "lightningcss": "^1.29.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tsdown": "^0.22.0",
     "typescript": "^5.5.0",
     "vitest": "^2.0.0"
   },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-primitives",
+        "@deepseek-ai/dsh-client-ui-slots"
+      ]
     }
   }
 }

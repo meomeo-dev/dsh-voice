@@ -3,7 +3,7 @@
  * @module dsh-voice/command
  */
 
-import type { VoiceFile } from './voice-schema.js'
+import type { VoiceFile } from './voice-schema.ts'
 
 /** `/voice` 命令的解析结果:查看,或切换到某个口吻。 */
 export type VoiceCommand =

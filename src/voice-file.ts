@@ -5,9 +5,9 @@
 
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml'
 import { basename } from 'node:path'
-import { CURRENT_VOICE_VERSION, VOICE_ID_PATTERN, VOICE_SCHEMA } from './voice-schema.js'
-import type { VoiceExample, VoiceFile, VoiceFileData, VoiceIdentity } from './voice-schema.js'
-import { renderVoicePrompt } from './render.js'
+import { CURRENT_VOICE_VERSION, VOICE_ID_PATTERN, VOICE_SCHEMA } from './voice-schema.ts'
+import type { VoiceExample, VoiceFile, VoiceFileData, VoiceIdentity } from './voice-schema.ts'
+import { renderVoicePrompt } from './render.ts'
 
 /** 单次校验/迁移失败。 */
 export class VoiceFileError extends Error {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { findProjectRoot, listVoices } from '../src/voice-registry.js'
+import { findProjectRoot, listVoices } from '../src/voice-registry.ts'
 
 describe('listVoices', () => {
   it('loads the builtin default and handsome-guy voices', () => {

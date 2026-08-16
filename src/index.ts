@@ -1,8 +1,10 @@
 /**
- * dsh-voice 插件入口:把「切换对话口吻」接到 harness 的三个接缝上——
- * `systemPrompt.section` 提供动态口吻文本,`settings` 持久化当前选择,
- * `commands` 提供 `/voice` 人机命令;并注册 `create-voice` 元技能。
+ * dsh-voice 插件入口:把「切换对话口吻」接到 harness 的接缝上——
+ * `systemPrompt.section` 提供动态口吻文本(三级分层解析),
+ * `settings` 提供 legacy 用户级默认,`commands` 提供 `/voice` 人机命令,
+ * `webServer` 挂 `/voice/*` 路由供 Web UI 切换;并注册 `create-voice` 元技能。
  * 口吻来源是 voice 文件(内置 + 用户 + 项目),见 {@link module:dsh-voice/voice-registry}。
+ * 三级选择(会话/工作区/用户)持久化在 {@link module:dsh-voice/selection}。
  * 所有注册都是 effect,随插件 fiber 一起销毁。
  * @module dsh-voice
  */
@@ -17,19 +19,21 @@ import type { SettingsScope } from '@deepseek-ai/dsh-settings'
 import type { CommandInvocation, CommandResult } from '@deepseek-ai/dsh-commands'
 import type {} from '@deepseek-ai/dsh-system-prompt'
 import type {} from '@deepseek-ai/dsh-skill'
-import { DEFAULT_TONE_ID } from './tones.js'
-import { voicePromptFor } from './section.js'
-import { USAGE, listVoicesText, parseVoiceCommand } from './command.js'
-import { listVoices } from './voice-registry.js'
-import { parseSkillMarkdown } from './skill-md.js'
+import { DEFAULT_TONE_ID } from './tones.ts'
+import { voicePromptFor } from './section.ts'
+import { USAGE, listVoicesText, parseVoiceCommand } from './command.ts'
+import { listVoices } from './voice-registry.ts'
+import { readSelection, resolveEffectiveVoice, VOICE_OFF, writeSelection } from './selection.ts'
+import { parseSkillMarkdown } from './skill-md.ts'
+import VoiceRoutes from './routes.ts'
 
 export const name = 'dsh-voice'
 export const inject = ['systemPrompt', 'commands']
 
-/** 用户可写设置命名空间。 */
+/** 用户可写设置命名空间(legacy 用户级默认)。 */
 const NAMESPACE = settingsNamespace('voice')
 
-/** 用户可写的设置切片:当前口吻 id。 */
+/** 用户可写的设置切片:legacy 用户级默认口吻 id。 */
 interface VoiceSettings {
   tone: string
 }
@@ -51,8 +55,9 @@ function describeError(error: unknown): string {
 }
 
 /**
- * 执行一次 `/voice` 命令:查看或切换口吻,切换结果持久化进 settings。
- * @param scope - 已注册的 voice 设置作用域。
+ * 执行一次 `/voice` 命令:查看或切换口吻。
+ * `show` 显示三级分层后的生效口吻;`switch` 写用户级默认(selection.yaml.user)。
+ * @param scope - 已注册的 voice 设置作用域(legacy 用户默认)。
  * @param invocation - 命令调用(含 rawInput、agent、signal)。
  * @returns 归一化的命令结果。
  */
@@ -60,27 +65,43 @@ async function executeVoiceCommand(
   scope: SettingsScope<VoiceSettings>,
   invocation: CommandInvocation,
 ): Promise<CommandResult> {
-  const voices = listVoices(invocation.agent.session.header.cwd)
+  const agent = invocation.agent
+  const sessionId = agent.id
+  const cwd = agent.session.header.cwd
+  const voices = listVoices(cwd)
+  const knownIds = new Set(voices.map(voice => voice.id))
+  const selection = readSelection()
   const command = parseVoiceCommand(invocation.rawInput)
 
   if (command.kind === 'show') {
-    const current = scope.get().tone
+    const effective = resolveEffectiveVoice(selection, sessionId, cwd, scope.get().tone, DEFAULT_TONE_ID, knownIds)
+    const current = effective === VOICE_OFF ? 'off' : effective
     return {
       kind: 'success',
       text: `Current tone: ${current}\n\nAvailable tones:\n${listVoicesText(voices, current)}`,
     }
   }
 
-  const voice = voices.find(v => v.id === command.id)
+  // `/voice off` 关闭口吻（写用户级 off），不要求存在名为 off 的 voice。
+  if (command.id === VOICE_OFF) {
+    try {
+      writeSelection({ ...selection, user: VOICE_OFF })
+    } catch (error) {
+      return { kind: 'error', text: `Failed to disable tone: ${describeError(error)}` }
+    }
+    return { kind: 'success', text: 'Tone disabled (off).' }
+  }
+
+  const voice = voices.find(item => item.id === command.id)
   if (voice === undefined) {
     return {
       kind: 'error',
-      text: `Unknown tone "${command.id}". Available: ${voices.map(v => v.id).join(', ')}.\n${USAGE}`,
+      text: `Unknown tone "${command.id}". Available: ${voices.map(item => item.id).join(', ')}.\n${USAGE}`,
     }
   }
 
   try {
-    await scope.update({ tone: voice.id })
+    writeSelection({ ...selection, user: voice.id })
   } catch (error) {
     return { kind: 'error', text: `Failed to switch tone: ${describeError(error)}` }
   }
@@ -88,30 +109,37 @@ async function executeVoiceCommand(
 }
 
 /**
- * 插件入口:注册口吻 section(始终),并在 settings 存在时注册设置命名空间与 `/voice` 命令;
- * 在 skills 存在时注册 `create-voice` 元技能。
+ * 插件入口:注册口吻 section(始终)、settings legacy 默认与 `/voice` 命令、
+ * `/voice/*` Web 路由、以及 `create-voice` 元技能。
  * @param ctx - Cordis 上下文。
  */
 export function apply(ctx: Context): void {
-  // 当前生效口吻。section 每次 assemble 都读它,切换即时生效。
-  let activeTone = DEFAULT_TONE_ID
+  // legacy 用户级默认口吻(settings.voice.tone);section 每次 assemble 用它作回退。
+  let legacyTone = DEFAULT_TONE_ID
 
   // order 10:persona(0)之后、工具指导(100–199)之前。
   ctx.systemPrompt.section({
     name: 'voice:tone',
     order: 10,
     text: (context) => {
-      const cwd = context.agent?.session.header.cwd
-      return voicePromptFor(listVoices(cwd), activeTone)
+      const agent = context.agent
+      const sessionId = agent?.id
+      const cwd = agent?.session.header.cwd
+      const voices = listVoices(cwd)
+      const knownIds = new Set(voices.map(voice => voice.id))
+      const effective = resolveEffectiveVoice(readSelection(), sessionId, cwd, legacyTone, DEFAULT_TONE_ID, knownIds)
+      // 关闭 voice 时返回空串,该 section 在渲染时被整体丢弃。
+      if (effective === VOICE_OFF) return ''
+      return voicePromptFor(voices, effective)
     },
   })
 
-  // settings 是可选服务;存在时接管 activeTone 的读写,并挂载 /voice。
+  // settings 是可选服务;存在时接管 legacy 默认的读写,并挂载 /voice。
   ctx.inject(['settings'], (sctx) => {
     const scope = sctx.settings.register(NAMESPACE, SCHEMA, { base: { tone: DEFAULT_TONE_ID } })
-    activeTone = scope.get().tone
+    legacyTone = scope.get().tone
     scope.watch(next => {
-      activeTone = next.tone
+      legacyTone = next.tone
     })
 
     ctx.commands.register({
@@ -121,6 +149,9 @@ export function apply(ctx: Context): void {
       handler: invocation => executeVoiceCommand(scope, invocation),
     })
   })
+
+  // 挂 Web UI 路由(webServer 存在时激活;headless 下静默不挂)。
+  ctx.plugin(VoiceRoutes)
 
   // skills 是可选服务;存在时暴露 create-voice 元技能(模型与人皆可调用)。
   ctx.inject(['skills'], (sctx) => {

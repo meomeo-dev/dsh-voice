@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { migrateVoiceFileText, parseVoiceFile, serializeVoice, validateNewVoice } from '../src/voice-file.js'
-import { CURRENT_VOICE_VERSION } from '../src/voice-schema.js'
+import { migrateVoiceFileText, parseVoiceFile, serializeVoice, validateNewVoice } from '../src/voice-file.ts'
+import { CURRENT_VOICE_VERSION } from '../src/voice-schema.ts'
 
 const DEMO_PATH = '/voices/demo-tone.voice.yaml'
 

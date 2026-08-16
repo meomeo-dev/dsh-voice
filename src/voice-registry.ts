@@ -15,8 +15,8 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { parseVoiceFile, VOICE_EXTENSION } from './voice-file.js'
-import type { VoiceFile } from './voice-schema.js'
+import { parseVoiceFile, VOICE_EXTENSION } from './voice-file.ts'
+import type { VoiceFile } from './voice-schema.ts'
 
 /** 内置 voice 目录(包内 `voices/`)。 */
 const BUILTIN_VOICE_DIR = fileURLToPath(new URL('../voices', import.meta.url))
@@ -28,7 +28,7 @@ const DSH_HOME_ENV = 'DSH_HOME'
 const AGENTS_HOME_ENV = 'DSH_AGENTS_HOME'
 
 /** 解析 dsh home。 */
-function dshHome(): string {
+export function dshHome(): string {
   const fromEnv = process.env[DSH_HOME_ENV]
   return resolve(fromEnv !== undefined && fromEnv.trim().length > 0 ? fromEnv : join(homedir(), '.dsh'))
 }

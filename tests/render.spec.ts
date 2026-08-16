@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { renderVoicePrompt } from '../src/render.js'
-import { DEFAULT_TEMPLATE } from '../src/voice-schema.js'
-import type { VoiceFileData } from '../src/voice-schema.js'
+import { renderVoicePrompt } from '../src/render.ts'
+import { DEFAULT_TEMPLATE } from '../src/voice-schema.ts'
+import type { VoiceFileData } from '../src/voice-schema.ts'
 
 function data(overrides: Partial<VoiceFileData> = {}): VoiceFileData {
   return {
