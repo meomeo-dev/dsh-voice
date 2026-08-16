@@ -1,0 +1,16 @@
+.item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--ds-label-primary, #0f1115);
+}
+
+.item:hover {
+  background: var(--ds-hover, rgba(38, 49, 72, 0.06));
+}
