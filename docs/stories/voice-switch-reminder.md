@@ -14,8 +14,9 @@ dsh-voice 允许用户在一段会话中随时切换「对话口吻」(voice)。
 - **「生效 voice」= 3 级配置按优先级折叠后的结果**(会话 → 工作区 → 用户 → legacy 默认)。
   只有这个折叠值变化才算「切换」;改动被更高优先级层遮蔽的层级,不算切换。
 - 触发点是**切换动作本身**(写 selection 处),而不是 assemble 时靠历史记录前后对比——
-  历史会话在状态文件里没有「切换前」记录,靠对比会漏掉首次切换。
-- 发送时机是**下个 turn**(下一次 assemble),不是切换发生的那个瞬间。
+  历史会话没有「切换前」记录,靠对比会漏掉首次切换。
+- 发送时机是**下个 turn**:提醒作为一条 user 消息经 `agent.inject()` 注入 next-step 队列
+  (不唤醒 driver),随用户下一条消息开启的下一 turn 一起发出,成为该 turn 的第一条 user 消息。
 
 ---
 
@@ -27,7 +28,7 @@ dsh-voice 允许用户在一段会话中随时切换「对话口吻」(voice)。
 
 - **Given** 会话 S 有一段历史,此前模型以 voice A 的身份回应过。
 - **When** 用户通过 🎙️ 把「会话级」voice 从 A 改为 B,然后发出下一条消息。
-- **Then** 下个 turn 的 system prompt 注入一次 `<reminder>用户切赋予你(B)了新的身份…</reminder>`,且排在 `voice:tone`(B 的指导)之前。
+- **Then** 下个 turn 作为第一条 user 消息注入一次 `<reminder>用户切赋予你(B)了新的身份…</reminder>`,排在用户真实消息之前。
 - **And** 之后的 turn 不再重复注入。
 
 ## US-2 · 切换非生效层级不提醒(优先级折叠)
@@ -72,7 +73,7 @@ dsh-voice 允许用户在一段会话中随时切换「对话口吻」(voice)。
 
 - **Given** 用户切换 voice 到 B,已在下个 turn 提醒过一次。
 - **When** 用户继续发第 2、第 3 条消息。
-- **Then** 这些 turn 的 system prompt 均不再包含该提醒。
+- **Then** 这些 turn 均不再包含该提醒。
 
 ## US-6 · 新会话首次设 voice → 提醒一次(从 fallback 切到新身份)
 
@@ -91,7 +92,7 @@ dsh-voice 允许用户在一段会话中随时切换「对话口吻」(voice)。
 **so that** 缺失的 voice 不影响会话继续。
 
 - **Given** 会话 S 有一个待提醒的 voice id = D。
-- **When** 下个 turn assemble 时,D 已不在可见 voice 集合中。
+- **When** 切换发生时,D 已不在可见 voice 集合中(或在下个 turn 前被删)。
 - **Then** 不注入提醒(也不重复),`voice:tone` 按既有回退逻辑处理(回退到 default)。
 
 ---
@@ -99,5 +100,5 @@ dsh-voice 允许用户在一段会话中随时切换「对话口吻」(voice)。
 ## 非目标
 
 - 不提醒「模型自己内部想要切换 voice」——只有用户显式写 selection 才可能触发。
-- 不跨会话:提醒标记按 session 隔离,新建会话不继承旧会话的待提醒状态。
-- 不改 `voice:tone` 的既有回退/渲染逻辑;提醒是独立 section,失败静默。
+- 不跨会话:提醒经 `agent.inject()` 进入目标会话的 inbox,天然按会话隔离,不继承。
+- 不改 `voice:tone` 的既有回退/渲染逻辑;提醒是独立 user 消息,失败静默。

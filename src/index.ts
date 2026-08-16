@@ -24,8 +24,8 @@ import { voicePromptFor } from './section.ts'
 import { USAGE, listVoicesText, parseVoiceCommand } from './command.ts'
 import { listVoices } from './voice-registry.ts'
 import { readSelection, resolveEffectiveVoice, VOICE_OFF, writeSelection } from './selection.ts'
-import { consumePending, noteEffectiveSwitch, readSwitchState, writeSwitchState } from './switch-state.ts'
-import { switchReminderFor } from './switch-reminder.ts'
+import { detectEffectiveSwitch } from './switch-detect.ts'
+import { injectSwitchReminder } from './switch-reminder.ts'
 import { parseSkillMarkdown } from './skill-md.ts'
 import VoiceRoutes from './routes.ts'
 
@@ -84,9 +84,12 @@ async function executeVoiceCommand(
     }
   }
 
-  // 切换点:切换前/后各算一次生效 voice,变化则标记下个 turn 提醒一次。
+  // 切换点:切换前/后各算一次生效 voice,变化则把提醒注入为下一 turn 的用户消息。
   const noteSwitch = (next: ReturnType<typeof readSelection>): void => {
-    noteEffectiveSwitch(selection, next, sessionId, cwd, scope.get().tone, DEFAULT_TONE_ID, knownIds)
+    const switchedTo = detectEffectiveSwitch(selection, next, sessionId, cwd, scope.get().tone, DEFAULT_TONE_ID, knownIds)
+    if (switchedTo === undefined) return
+    const voice = voices.find(item => item.id === switchedTo)
+    if (voice !== undefined) injectSwitchReminder(agent, voice)
   }
 
   // `/voice off` 关闭口吻（写用户级 off），不要求存在名为 off 的 voice。
@@ -127,30 +130,6 @@ async function executeVoiceCommand(
 export function apply(ctx: Context): void {
   // legacy 用户级默认口吻(settings.voice.tone);section 每次 assemble 用它作回退。
   let legacyTone = DEFAULT_TONE_ID
-
-  // order 5:persona(0)之后、voice:tone(10)之前。切换 voice 后注入一次提醒，
-  // 让模型主动重新代入新身份;提醒来自切换点落下的 pending 标记,消费一次即清除。
-  ctx.systemPrompt.section({
-    name: 'voice:switch-reminder',
-    order: 5,
-    text: (context) => {
-      const agent = context.agent
-      const sessionId = agent?.id
-      if (sessionId === undefined) return ''
-      const state = readSwitchState()
-      const { voiceId, next } = consumePending(state, sessionId)
-      if (voiceId === undefined) return ''
-      try {
-        writeSwitchState(next)
-      } catch {
-        // 静默:写失败会重发提醒,但不阻塞 assemble。
-      }
-      // voice 被删/移动时静默跳过(不重复提醒)。
-      const voice = listVoices(agent?.session.header.cwd).find(item => item.id === voiceId)
-      if (voice === undefined) return ''
-      return switchReminderFor(voice)
-    },
-  })
 
   // order 10:persona(0)之后、工具指导(100–199)之前。
   ctx.systemPrompt.section({

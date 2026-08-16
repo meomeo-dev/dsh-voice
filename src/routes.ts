@@ -10,6 +10,8 @@
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Context } from '@deepseek-ai/cordis'
+import type { Agent } from '@deepseek-ai/dsh-agent'
+import type { SessionId } from '@deepseek-ai/dsh-session'
 import type {} from '@deepseek-ai/dsh-host-webserver'
 import { settingsNamespace } from '@deepseek-ai/dsh-settings'
 import { DEFAULT_TONE_ID } from './tones.ts'
@@ -17,7 +19,8 @@ import { findProjectRoot, listVoices } from './voice-registry.ts'
 import {
   readSelection, resolveEffectiveVoice, VOICE_OFF, writeSelection, type VoiceSelection,
 } from './selection.ts'
-import { noteEffectiveSwitch } from './switch-state.ts'
+import { detectEffectiveSwitch } from './switch-detect.ts'
+import { injectSwitchReminder } from './switch-reminder.ts'
 
 /** settings 命名空间 `voice` 的 branded key（与 index.ts 的 NAMESPACE 一致）。 */
 const VOICE_NAMESPACE = settingsNamespace('voice')
@@ -104,6 +107,13 @@ function legacyUser(ctx: Context): string {
   const settings = ctx.get('settings') as { get?: (ns: unknown) => unknown } | undefined
   const section = settings?.get?.(VOICE_NAMESPACE) as { tone?: unknown } | undefined
   return typeof section?.tone === 'string' && section.tone !== '' ? section.tone : DEFAULT_TONE_ID
+}
+
+/** 由 sessionId 取 live agent（可选服务，不存在或会话未 live 时 undefined）。 */
+function liveAgent(ctx: Context, sessionId: string | undefined): Agent | undefined {
+  if (sessionId === undefined) return undefined
+  const agents = ctx.get('agents') as { get?: (id: SessionId) => Agent | undefined } | undefined
+  return agents?.get?.(sessionId as SessionId)
 }
 
 /** 组装三级状态 + voice 选项。 */
@@ -238,9 +248,12 @@ export default class VoiceRoutes {
 
           const next = applyLevel(selection, level, sessionId, cwd, target)
           writeSelection(next)
-          // 切换点:生效 voice 变化则标记下个 turn 提醒一次(会话归属需 sessionId)。
-          if (sessionId !== undefined) {
-            noteEffectiveSwitch(selection, next, sessionId, cwd, legacyUser(ctx), DEFAULT_TONE_ID, knownIds)
+          // 切换点:生效 voice 变化则把提醒注入为下一 turn 的用户消息。
+          const switchedTo = detectEffectiveSwitch(selection, next, sessionId, cwd, legacyUser(ctx), DEFAULT_TONE_ID, knownIds)
+          if (switchedTo !== undefined) {
+            const voice = voices.find(item => item.id === switchedTo)
+            const agent = liveAgent(ctx, sessionId)
+            if (voice !== undefined && agent !== undefined) injectSwitchReminder(agent, voice)
           }
           return voiceState(ctx, sessionId, cwd)
         })

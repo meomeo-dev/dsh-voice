@@ -112,6 +112,8 @@ dsh-voice/
 │   ├── voice-registry.ts # 目录发现 + 合并 + 缓存
 │   ├── section.ts        # 口吻渲染(纯函数)
 │   ├── command.ts        # /voice 解析与展示(纯函数)
+│   ├── switch-detect.ts  # 切换检测:折叠前后生效 voice 对比(纯函数)
+│   ├── switch-reminder.ts# 切换提醒文案 + agent.inject 注入(下一 turn 的 user 消息)
 │   └── skill-md.ts       # SKILL.md frontmatter 解析
 ├── scripts/gen-schema.mjs  # 生成 voice.schema.yaml
 ├── tests/

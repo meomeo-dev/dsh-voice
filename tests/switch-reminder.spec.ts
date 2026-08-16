@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { switchReminderFor } from '../src/switch-reminder.ts'
+import type { UserMessage } from '@deepseek-ai/dsh-llm'
+import { injectSwitchReminder, switchReminderFor } from '../src/switch-reminder.ts'
 import type { VoiceFile } from '../src/voice-schema.ts'
 
 const base: VoiceFile = {
@@ -27,5 +28,17 @@ describe('switchReminderFor', () => {
   it('falls back to the id when label is empty', () => {
     const reminder = switchReminderFor({ ...base, label: '' })
     expect(reminder).toContain('(handsome-guy)')
+  })
+})
+
+describe('injectSwitchReminder', () => {
+  it('injects a user-role message carrying the reminder text', () => {
+    const injected: UserMessage[] = []
+    const agent = { inject: (message: UserMessage) => { injected.push(message) } }
+    injectSwitchReminder(agent as never, base)
+    expect(injected).toHaveLength(1)
+    expect(injected[0]!.role).toBe('user')
+    expect(injected[0]!.source).toEqual({ kind: 'plugin', plugin: 'dsh-voice' })
+    expect(injected[0]!.content).toEqual([{ type: 'text', text: switchReminderFor(base) }])
   })
 })
