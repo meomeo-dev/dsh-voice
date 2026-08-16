@@ -22,9 +22,14 @@ export function VoiceSettingAction({ renderSlot, t }: VoiceSettingActionProps) {
   useEffect(() => {
     if (!menuOpen) return
     const closeOutside = (event: PointerEvent): void => {
-      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) {
-        setMenuOpen(false)
-      }
+      const target = event.target
+      if (!(target instanceof Node)) return
+      if (rootRef.current?.contains(target)) return
+      // 子菜单项弹出的模态框 portal 到 body（Modal），不在 anchor 子树内；
+      // 把它的关闭判定交给 Modal 自身（遮罩 click / Esc），这里不再顺带关掉
+      // 下拉，否则点击面板内部会把菜单连同模态框一起卸载。
+      if (target instanceof Element && target.closest('[role="dialog"]') !== null) return
+      setMenuOpen(false)
     }
     document.addEventListener('pointerdown', closeOutside)
     return () => { document.removeEventListener('pointerdown', closeOutside) }
