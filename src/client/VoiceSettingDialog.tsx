@@ -1,10 +1,11 @@
-/** 三级 voice 设置模态框：会话 / 工作区 / 用户默认，各一个下拉切换。 */
+/** 三级 voice 设置模态框：会话 / 工作区 / 用户默认，各一个下拉切换 + 复制按钮。 */
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-client-runtime/client'
-import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
+import { IconCopyOutline16, Modal } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import type { VoiceLevel, VoiceOption, VoiceState } from './api.ts'
+import { CopyToast } from './CopyToast.tsx'
 import { NS } from './locales.ts'
 import css from './VoiceSettingDialog.module.css'
 
@@ -35,17 +36,19 @@ function effectiveLabel(effective: string, voices: VoiceOption[], t: TranslateNS
 
 /** 一个层级的下拉行。`allowInherit` 为该层提供「继承」选项（会话/工作区）。 */
 function LevelRow({
-  label, value, voices, allowInherit, onSelect, t,
+  label, value, voices, allowInherit, onSelect, onCopy, t,
 }: {
   label: string
   value: string | null
   voices: VoiceOption[]
   allowInherit: boolean
   onSelect: (voiceId: string | null) => void
+  onCopy: (voiceId: string) => void
   t: TranslateNS<typeof NS>
 }) {
   // `<select>` 用空串表示「继承」（映射为 null）。
   const selected = value ?? ''
+  const copyable = value !== null && value !== 'off'
   return (
     <div className={css.row}>
       <span className={css.label}>{label}</span>
@@ -60,6 +63,16 @@ function LevelRow({
           <option key={voice.id} value={voice.id}>{voice.label}</option>
         ))}
       </select>
+      <button
+        type="button"
+        className={css.copy}
+        aria-label={t('copy.aria')}
+        title={t('copy.aria')}
+        disabled={!copyable}
+        onClick={() => { if (copyable) onCopy(value) }}
+      >
+        <IconCopyOutline16 size={14} />
+      </button>
     </div>
   )
 }
@@ -74,6 +87,8 @@ export function VoiceSettingDialog({
 }: VoiceSettingDialogProps) {
   const [state, setState] = useState<VoiceState | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [toast, setToast] = useState<{ key: number; text: string } | null>(null)
+  const toastKey = useRef(0)
 
   useEffect(() => {
     if (!open) return
@@ -91,6 +106,13 @@ export function VoiceSettingDialog({
       .then(next => setState(next))
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : String(reason)))
   }, [sessionId, cwd, setVoice])
+
+  const copyVoiceId = useCallback((id: string) => {
+    void navigator.clipboard.writeText(id).then(() => {
+      toastKey.current += 1
+      setToast({ key: toastKey.current, text: t('copy.done') })
+    }).catch(() => {})
+  }, [t])
 
   return (
     <Modal open={open} onClose={onClose} title={t('dialog.title')} description={t('dialog.description')}>
@@ -111,6 +133,7 @@ export function VoiceSettingDialog({
                   voices={state.voices}
                   allowInherit
                   onSelect={select('session')}
+                  onCopy={copyVoiceId}
                   t={t}
                 />
                 <LevelRow
@@ -119,6 +142,7 @@ export function VoiceSettingDialog({
                   voices={state.voices}
                   allowInherit
                   onSelect={select('workspace')}
+                  onCopy={copyVoiceId}
                   t={t}
                 />
                 <LevelRow
@@ -127,10 +151,12 @@ export function VoiceSettingDialog({
                   voices={state.voices}
                   allowInherit={false}
                   onSelect={select('user')}
+                  onCopy={copyVoiceId}
                   t={t}
                 />
               </>
             )}
+      {toast !== null && <CopyToast key={toast.key} text={toast.text} onDone={() => { setToast(null) }} />}
     </Modal>
   )
 }

@@ -1,0 +1,45 @@
+/* 右上角复制成功 toast：沿用 dsh Toast 的对比填充 + 反色标签 + lv3 阴影 +
+   滑入淡出；位置改为右上角（dsh 内建 Toast 是顶部居中）。淡出延迟+时长
+   MUST 与 CopyToast.tsx 的 VISIBLE_MS 一致。 */
+
+.toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 1100;
+  /* 纯通告，永不拦截点击。 */
+  pointer-events: none;
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: var(--dsw-alias-button-contrast-fill);
+  color: var(--dsw-alias-label-primary-inverted);
+  font: var(--dsw-font-s-14);
+  box-shadow: var(--dsw-shadow-lv3);
+  animation:
+    dsh-voice-copy-toast-in 160ms ease-out,
+    dsh-voice-copy-toast-fade 300ms ease 1700ms forwards;
+}
+
+@keyframes dsh-voice-copy-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dsh-voice-copy-toast-fade {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: dsh-voice-copy-toast-fade 300ms ease 1700ms forwards;
+  }
+}
