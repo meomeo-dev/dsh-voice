@@ -23,7 +23,10 @@ import { basename, dirname, resolve as resolvePath } from 'node:path'
 import type { UserConfig } from 'tsdown'
 import { transform } from 'lightningcss'
 
-const ID = 'dsh-voice'
+// 必须与 package.json 的 name（= loader entry name）完全一致：client-modules
+// 的模块表按 entry name 匹配 `window.__ModuleLoader__.load({ id })`，两者不符即
+// "loaded without registering"。
+const ID = '@meomeo-dev/dsh-voice'
 
 /** Module specifiers the web shell shares into the frozen module table. */
 const CLIENT_EXTERNALS = [
