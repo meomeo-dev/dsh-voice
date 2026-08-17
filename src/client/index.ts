@@ -108,11 +108,12 @@ export function apply(ctx: ClientContext): void {
     },
   })
 
-  // hero 屏 🎙️ 入口：下拉渲染 voice.hero.menu（single slot，无 id）。
+  // hero 屏 🎙️ 入口：下拉渲染 voice.hero.menu（list slot，按 id 与 tts 回落并存）。
   ctx.slots.inject(
     'conversation.hero.voice',
     () => ctx.slots.register({
       name: 'conversation.hero.voice',
+      id: 'voice-setting-hero',
       locale: NS,
       children: {
         'voice.hero.menu': { kind: 'list', scope: 'root' },
