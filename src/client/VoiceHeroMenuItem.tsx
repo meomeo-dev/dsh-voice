@@ -11,6 +11,8 @@ import css from './VoiceMenuItem.module.css'
 export interface VoiceHeroInjected extends VoiceSettingInjected {
   /** 把「新建会话」级选择暂存（null = 继承 = 清除暂存）。 */
   stageSession: (voiceId: string | null) => void
+  /** 当前暂存值（null = 继承），对话框重开时据此回显。 */
+  stagedSession: () => string | null
   /** 当前工作区的 cwd（无选中工作区时为 undefined）。 */
   workspaceCwd: () => string | undefined
 }
@@ -26,7 +28,7 @@ export type VoiceHeroMenuItemProps =
  * @returns 菜单项按钮 + 模态框。
  */
 export function VoiceHeroMenuItem({
-  getState, setVoice, stageSession, workspaceCwd, t,
+  getState, setVoice, stageSession, stagedSession, workspaceCwd, t,
 }: VoiceHeroMenuItemProps) {
   const [open, setOpen] = useState(false)
   const cwd = workspaceCwd()
@@ -44,6 +46,7 @@ export function VoiceHeroMenuItem({
         getState={getState}
         setVoice={setVoice}
         stageSession={stageSession}
+        stagedSession={stagedSession}
         t={t}
       />
     </>

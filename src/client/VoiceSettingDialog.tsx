@@ -30,6 +30,11 @@ export interface VoiceSettingDialogProps {
    * 该回调而非立即写 session 级）。缺省保持 header 的立即写语义。
    */
   stageSession?: (voiceId: string | null) => void
+  /**
+   * hero 屏专用：当前暂存值（null = 继承），对话框挂载时据此初始化「新建会话」
+   * 行的回显。与 {@link stageSession} 成对出现；header 模式两者都缺省。
+   */
+  stagedSession?: () => string | null
   t: TranslateNS<typeof NS>
 }
 
@@ -88,12 +93,14 @@ function LevelRow({
  * @returns 关闭时为 null，否则 overlay 树。
  */
 export function VoiceSettingDialog({
-  open, onClose, sessionId, cwd, getState, setVoice, stageSession, t,
+  open, onClose, sessionId, cwd, getState, setVoice, stageSession, stagedSession, t,
 }: VoiceSettingDialogProps) {
   const [state, setState] = useState<VoiceState | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [toast, setToast] = useState<{ key: number; text: string } | null>(null)
   const toastKey = useRef(0)
+  // hero 屏「新建会话」行的暂存回显：本地持有，选择即更新（不依赖服务端往返）。
+  const [staged, setStaged] = useState<string | null>(() => stagedSession?.() ?? null)
 
   useEffect(() => {
     if (!open) return
@@ -111,6 +118,12 @@ export function VoiceSettingDialog({
       .then(next => setState(next))
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : String(reason)))
   }, [sessionId, cwd, setVoice])
+
+  // hero 屏「新建会话」行：本地回显 + 暂存到席位，不做服务端往返。
+  const stage = useCallback((voiceId: string | null) => {
+    setStaged(voiceId)
+    stageSession?.(voiceId)
+  }, [stageSession])
 
   const copyVoiceId = useCallback((id: string) => {
     void navigator.clipboard.writeText(id).then(() => {
@@ -134,10 +147,10 @@ export function VoiceSettingDialog({
                 </p>
                 <LevelRow
                   label={stageSession !== undefined ? t('level.nextSession') : t('level.session')}
-                  value={state.session}
+                  value={stageSession !== undefined ? staged : state.session}
                   voices={state.voices}
                   allowInherit
-                  onSelect={stageSession ?? select('session')}
+                  onSelect={stageSession !== undefined ? stage : select('session')}
                   onCopy={copyVoiceId}
                   t={t}
                 />

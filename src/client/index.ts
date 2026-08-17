@@ -101,6 +101,7 @@ export function apply(ctx: ClientContext): void {
     getState: (sessionId, cwd) => getVoiceState(sessionId, cwd),
     setVoice: (sessionId, cwd, level, voiceId) => setVoice(sessionId, cwd, level, voiceId),
     stageSession: voiceId => { seat.stage(voiceId) },
+    stagedSession: () => seat.snapshot(),
     workspaceCwd: () => {
       const state = ctx.workspaces.list.getSnapshot()
       const id = state.recentWorkspaceId

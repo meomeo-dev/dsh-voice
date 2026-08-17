@@ -50,6 +50,14 @@ export class HeroVoiceSeatController {
   }
 
   /**
+   * 当前暂存值（null = 无暂存 = 继承），供 hero 菜单项回显（对话框重开时据此初始化）。
+   * @returns 暂存的 voice id，或 null。
+   */
+  snapshot(): string | null {
+    return this.staged ?? null
+  }
+
+  /**
    * 把暂存选择写为当前会话的 session 级 voice（若有一个空白会话可接）。
    * 由调用方在会话列表变化时触发；也幂等地处理「会话已启动」的情况。
    * @returns 应用完成（无暂存或无会话时立即返回）。
