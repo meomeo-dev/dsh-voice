@@ -31,6 +31,13 @@ dsh --profile demo
 /voice sun-wukong     # 切换到「孙悟空」的口吻
 ```
 
+Web GUI 里也有 voice 入口:
+
+- **会话标题栏** 🎙️ → 「设置会话Voice」:三级配置(当前会话 / 当前工作区 / 用户默认),选择即时持久化到 `~/.dsh/voice/selection.yaml`。
+- **新建会话 hero 屏** 🎙️ → 「设置会话Voice」:「新建会话」级选择暂存,空白会话成为当前时透传为新 session 的 session 级 voice(镜像 agent 预设的「暂存→应用」范式)。
+
+详见 [docs/voice-settings-web-ui.md](docs/voice-settings-web-ui.md)。
+
 ## 安装与 prepare 说明
 
 三种安装方式对「是否需要本地构建」的处理不同:

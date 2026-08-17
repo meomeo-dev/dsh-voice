@@ -147,3 +147,30 @@ dsh-voice/
 - **user 级双源**：`settings.voice.tone`（legacy）与 `selection.yaml.user`（新主源）并存。解析时 `user` 优先于 `settings`，`/voice` 与新 UI 都写 `selection.yaml.user`，避免新写入分叉；老用户已配的 `settings.voice.tone` 仍读作回退，不丢。
 - **loopback 假设**：默认 Web GUI 是本地 `127.0.0.1`。远程浏览器场景本插件拒绝提供 voice 路由（与 dsh-compass / 默认 web posture 一致）。若要支持远程，需另加鉴权，超出本期。
 - **构建切换**：由纯 `tsc` 改为 `tsdown`（node ESM + client CJS closure），是双半包的既定做法（dsh-compass 同构）。需回归 node half 的 `voices/` 与 `skill/` 相对路径解析（`import.meta.url` 相对包根，仍成立）。
+
+## 10. 新建会话 hero 屏入口（「下一个 session」暂存→应用）
+
+### 10.1 背景与机制
+
+header 的 🎙️ 挂在 `conversation.session.header.actions`，但 `ConversationSessionHeader` 在空白阶段隐藏整个 header，新建会话的 hero 屏无从选 voice。harness 在 hero 工作区行（agent 预设 chip 之后）暴露了一个 `conversation.hero.voice` **list slot**（`scope: root`，空席位渲染为空），本插件与 dsh-voice-tts 各自注册条目、互不感知。
+
+hero 屏**没有 session id**，而 `voice.menu` 是 `scope: session`，故本插件声明一个 root 作用域宿主槽 `voice.hero.menu`（镜像 session 的 `voice.menu`），并把 hero 🎙️ 触发器注册进 `conversation.hero.voice`（id `voice-setting-hero`）；触发器点开渲染 `voice.hero.menu`，本插件往里放「设置会话Voice」菜单项（id `voice-hero-menu`）。
+
+### 10.2 三级对话框的「新建会话」级（stage，非立即写）
+
+hero 菜单项复用了 header 的 `VoiceSettingDialog`，但 `session` 行语义改为 **「本次新建会话」**（label `新建会话` / `Next session`）：
+
+- 该行选择走 `stageSession`（而非 `select('session')` 立即写），只在内存席位 `HeroVoiceSeatController` 里暂存，并在对话框本地回显（`stagedSession` 快照初始化、选择即更新本地态，不依赖服务端往返）。
+- `workspace` 行用当前选中工作区的 `cwd`（`ctx.workspaces.list` 的 `recentWorkspaceId` → `path`）立即写工作区级；`user` 行立即写用户级。
+
+### 10.3 `HeroVoiceSeatController`：stage → 空白会话成为 current 时应用
+
+镜像 `ui-agent-preset` 的 `AgentPresetSeatController`（`stage` / `select` / `apply` 同构）：
+
+- `stage(voiceId)` 只暂存；`select(voiceId)` = `stage` + 立即 `apply`。
+- `apply()`：当 `sessions.list` 的 current 会话存在且 `blank`（没跑过 turn）时，`POST /voice/set { sessionId, level:'session', voiceId }` 写为 session 级，然后消费暂存；若 current 已非 blank（历史早于选择）则丢弃暂存、拒绝覆盖。
+- `select()` 的立即 `apply` 覆盖「hero 屏就是一个已 current 的空白会话」的情形——此时发送首条消息只会把它翻为非 blank、**不引入新 session id**，单靠 list-change applier 会因 `!blank` 丢弃选择。list-change applier（`sessions.list.subscribe`）仍保留，覆盖「会话稍后才出现」的情形。
+
+### 10.4 与 dsh-voice-tts 的共存
+
+`conversation.hero.voice` 是 `list` slot，dsh-voice（🎙️，id `voice-setting-hero`）与 dsh-voice-tts（🔊 回落，id `voice-tts-hero-fallback`）各注册一个条目；dsh-voice-tts 的回落只在 `voice.hero.menu` 未声明（未装 dsh-voice）时渲染，否则返回 null，避免重复图标。dsh-voice-tts 还把 TTS 菜单项注入 `voice.hero.menu`，与「设置会话Voice」共用 hero 🎙️ 下拉。
