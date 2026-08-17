@@ -42,11 +42,22 @@ export class HeroVoiceSeatController {
   ) {}
 
   /**
-   * 暂存一个 voice 选择（null 表示继承 = 清除暂存）。
+   * 暂存一个 voice 选择（null 表示继承 = 清除暂存），不立即应用。
    * @param voiceId - voice id 或 `off`；null 清除暂存。
    */
   stage(voiceId: string | null): void {
     this.staged = voiceId ?? undefined
+  }
+
+  /**
+   * 暂存并立即应用（镜像 {@link AgentPresetSeatController.select}）：若此刻
+   * 已有一个空白会话 current（hero 屏正展示的那个「新会话」），选择立即落到
+   * 它身上；否则留给 list-change applier 在会话出现时应用。
+   * @param voiceId - voice id 或 `off`；null 清除暂存。
+   */
+  async select(voiceId: string | null): Promise<void> {
+    this.stage(voiceId)
+    await this.apply()
   }
 
   /**
@@ -71,7 +82,12 @@ export class HeroVoiceSeatController {
       this.staged = undefined
       return
     }
-    this.staged = undefined
-    await this.setVoice(session.id, undefined, 'session', staged)
+    try {
+      await this.setVoice(session.id, undefined, 'session', staged)
+    } finally {
+      // 无论成败都消费暂存（镜像 AgentPresetSeatController：失败也不滞留，
+      // 用户重选即可）；在 await 之后清除，保证并发 apply 幂等。
+      this.staged = undefined
+    }
   }
 }

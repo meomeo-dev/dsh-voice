@@ -100,7 +100,7 @@ export function apply(ctx: ClientContext): void {
   const heroActions = (): VoiceHeroInjected => ({
     getState: (sessionId, cwd) => getVoiceState(sessionId, cwd),
     setVoice: (sessionId, cwd, level, voiceId) => setVoice(sessionId, cwd, level, voiceId),
-    stageSession: voiceId => { seat.stage(voiceId) },
+    stageSession: voiceId => { void seat.select(voiceId) },
     stagedSession: () => seat.snapshot(),
     workspaceCwd: () => {
       const state = ctx.workspaces.list.getSnapshot()
