@@ -11,9 +11,9 @@ import css from './VoiceSettingDialog.module.css'
 
 /** 供父组件（header action）注入的业务动作。 */
 export interface VoiceSettingInjected {
-  getState: (sessionId: SessionId, cwd: string | undefined) => Promise<VoiceState>
+  getState: (sessionId: SessionId | undefined, cwd: string | undefined) => Promise<VoiceState>
   setVoice: (
-    sessionId: SessionId, cwd: string | undefined, level: VoiceLevel, voiceId: string | null,
+    sessionId: SessionId | undefined, cwd: string | undefined, level: VoiceLevel, voiceId: string | null,
   ) => Promise<VoiceState>
 }
 
@@ -21,10 +21,15 @@ export interface VoiceSettingInjected {
 export interface VoiceSettingDialogProps {
   open: boolean
   onClose: () => void
-  sessionId: SessionId
+  sessionId: SessionId | undefined
   cwd: string | undefined
   getState: VoiceSettingInjected['getState']
   setVoice: VoiceSettingInjected['setVoice']
+  /**
+   * hero 屏专用：提供时「会话」行改为暂存语义（label 变「新建会话」，选择调用
+   * 该回调而非立即写 session 级）。缺省保持 header 的立即写语义。
+   */
+  stageSession?: (voiceId: string | null) => void
   t: TranslateNS<typeof NS>
 }
 
@@ -83,7 +88,7 @@ function LevelRow({
  * @returns 关闭时为 null，否则 overlay 树。
  */
 export function VoiceSettingDialog({
-  open, onClose, sessionId, cwd, getState, setVoice, t,
+  open, onClose, sessionId, cwd, getState, setVoice, stageSession, t,
 }: VoiceSettingDialogProps) {
   const [state, setState] = useState<VoiceState | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -128,11 +133,11 @@ export function VoiceSettingDialog({
                   {t('level.effective')}: {effectiveLabel(state.effective, state.voices, t)}
                 </p>
                 <LevelRow
-                  label={t('level.session')}
+                  label={stageSession !== undefined ? t('level.nextSession') : t('level.session')}
                   value={state.session}
                   voices={state.voices}
                   allowInherit
-                  onSelect={select('session')}
+                  onSelect={stageSession ?? select('session')}
                   onCopy={copyVoiceId}
                   t={t}
                 />

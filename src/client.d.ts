@@ -16,5 +16,10 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
      * 每个社区插件各注册自己的条目，共用同一个图标入口。
      */
     'voice.menu': { kind: 'list'; scope: 'session' }
+    /**
+     * 新建会话 hero 屏 🎙️ 下拉里的菜单项列表（root scope）。与 `voice.menu` 同构，
+     * 但无 session；dsh-voice 与 dsh-voice-tts 各自注入条目，共用 hero 图标入口。
+     */
+    'voice.hero.menu': { kind: 'list'; scope: 'root' }
   }
 }

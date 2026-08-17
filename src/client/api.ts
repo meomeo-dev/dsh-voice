@@ -43,14 +43,14 @@ export async function routeFetch<T>(path: string, body: unknown): Promise<T> {
   return await response.json() as T
 }
 
-/** 读某会话/工作区的三级 voice 状态。 */
-export function getVoiceState(sessionId: SessionId, cwd: string | undefined): Promise<VoiceState> {
+/** 读某会话/工作区的三级 voice 状态。`sessionId` 缺省（hero 屏）时只回 workspace/user。 */
+export function getVoiceState(sessionId: SessionId | undefined, cwd: string | undefined): Promise<VoiceState> {
   return routeFetch<VoiceState>('/voice/get', { sessionId, cwd })
 }
 
 /** 写某一级的 voice 选择；`voiceId` 为 null 表示继承，`off` 表示关闭。 */
 export function setVoice(
-  sessionId: SessionId, cwd: string | undefined, level: VoiceLevel, voiceId: string | null,
+  sessionId: SessionId | undefined, cwd: string | undefined, level: VoiceLevel, voiceId: string | null,
 ): Promise<VoiceState> {
   return routeFetch<VoiceState>('/voice/set', { sessionId, cwd, level, voiceId })
 }
