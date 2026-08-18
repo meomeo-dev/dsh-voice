@@ -47,7 +47,7 @@ Web GUI 里也有 voice 入口:
 | 方式 | 命令 | 是否构建 |
 |---|---|---|
 | npm 发布包(推荐) | `dsh plugin --profile web add @meomeo-dev/dsh-voice` | 否,发布 tarball 已含 `lib/` |
-| gh/git 源码 | `dsh plugin --profile web add github:meomeo-dev/dsh-voice#v0.3.0` | 是,拉源码后跑 `prepare` 编译 |
+| gh/git 源码 | `dsh plugin --profile web add github:meomeo-dev/dsh-voice#v0.3.1` | 是,拉源码后跑 `prepare` 编译 |
 
 `prepare` 脚本(`tsc -p tsconfig.json`)的存在原因:git 安装拉的是**源码而非构建产物**,必须靠 `prepare` 把 `src/` 编译成 `lib/`,否则插件无法加载。npm 发布包则不需要——`lib/` 已在打包时构建好并随 tarball 分发。
 
