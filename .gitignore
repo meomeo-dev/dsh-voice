@@ -3,3 +3,5 @@ lib/
 *.tgz
 .DS_Store
 tmp/
+website/dist/
+.vercel/

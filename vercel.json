@@ -1,0 +1,7 @@
+{
+  "buildCommand": "pnpm site:build",
+  "outputDirectory": "website/dist",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

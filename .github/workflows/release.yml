@@ -1,6 +1,6 @@
 name: release
 
-# 发布一个 GitHub Release(非 draft)即触发,把包发布到 npm。
+# 发布一个 GitHub Release(非 draft)即触发:发布 npm 包并部署 Vercel 官网。
 # 首次使用前需要在 repo Settings → Secrets → Actions 里加一个 npm token
 # (见 README「发布到 npm」),名称为 NPM_TOKEN。
 on:
@@ -46,3 +46,38 @@ jobs:
         run: pnpm publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  deploy-website:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Pull Vercel project settings
+        run: pnpm dlx vercel@59.1.3 pull --yes --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Build Vercel artifacts
+        run: pnpm dlx vercel@59.1.3 build --prod --token="$VERCEL_TOKEN"
+
+      - name: Deploy Vercel production
+        run: pnpm dlx vercel@59.1.3 deploy --prebuilt --prod --token="$VERCEL_TOKEN"

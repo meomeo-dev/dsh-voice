@@ -14,13 +14,15 @@
 
 DeepSeek Harness 的「对话口吻」切换插件(bundle)。用户可随时 `/voice <id>` 切换口吻,立即生效并持久化。口吻是 `*.voice.yaml` 文件,可从内置/用户/项目三层目录发现;附带 `create-voice` 元技能与 `dsh-voice check` 校验工具。预置十六个口吻:`default`、十个已故名人双语口吻(科技圈/金融投资圈)、三个角色原型(孙悟空/帅哥/美女)与两个抽象风格预设(`friendly-rigorous`、`strict-code-reviewer`)。
 
+官网：[dsh-voice.vercel.app](https://dsh-voice.vercel.app)
+
 ## 用法
 
 安装到某个 profile:
 
 ```sh
-dsh plugin --profile demo add @meomeo-dev/dsh-voice
-dsh --profile demo
+dsh plugin --profile web add @meomeo-dev/dsh-voice
+dsh --profile web
 ```
 
 会话内切换:
@@ -44,8 +46,8 @@ Web GUI 里也有 voice 入口:
 
 | 方式 | 命令 | 是否构建 |
 |---|---|---|
-| npm 发布包(推荐) | `dsh plugin --profile demo add @meomeo-dev/dsh-voice` | 否,发布 tarball 已含 `lib/` |
-| gh/git 源码 | `dsh plugin --profile demo add github:meomeo-dev/dsh-voice#v0.2.1` | 是,拉源码后跑 `prepare` 编译 |
+| npm 发布包(推荐) | `dsh plugin --profile web add @meomeo-dev/dsh-voice` | 否,发布 tarball 已含 `lib/` |
+| gh/git 源码 | `dsh plugin --profile web add github:meomeo-dev/dsh-voice#v0.3.0` | 是,拉源码后跑 `prepare` 编译 |
 
 `prepare` 脚本(`tsc -p tsconfig.json`)的存在原因:git 安装拉的是**源码而非构建产物**,必须靠 `prepare` 把 `src/` 编译成 `lib/`,否则插件无法加载。npm 发布包则不需要——`lib/` 已在打包时构建好并随 tarball 分发。
 
@@ -148,8 +150,13 @@ dsh-voice migrate [dir...]   # 把旧版本 voice 文件原地迁移到当前版
 发布成功后可安装:
 
 ```sh
-dsh plugin --profile demo add @meomeo-dev/dsh-voice
+dsh plugin --profile web add @meomeo-dev/dsh-voice
 ```
+
+同一个 GitHub Release 也会触发官网的 Vercel Production 部署。首次启用需要在 GitHub 仓库的
+`Settings → Secrets and variables → Actions` 中配置 `VERCEL_TOKEN`、`VERCEL_ORG_ID` 和
+`VERCEL_PROJECT_ID`。当前官网使用 `vercel.json` 的 `pnpm site:build` 构建命令,输出目录为
+`website/dist`。
 
 ## 开发
 
@@ -163,9 +170,9 @@ pnpm schema:gen     # 重新生成 voice.schema.yaml
 本地联调:
 
 ```sh
-dsh plugin --profile demo add .
-dsh --profile demo --dump-config
-dsh --profile demo
+dsh plugin --profile web add .
+dsh --profile web --dump-config
+dsh --profile web
 ```
 
 ## 设计
