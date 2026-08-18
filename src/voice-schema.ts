@@ -131,6 +131,12 @@ export const DEFAULT_TEMPLATE = [
   '',
   '</you_remembered_your_voice_the_way_you_were_taught_to_speak>',
   '',
+  '<communication-preferences>',
+  '回复尽量采用自然、简短的真人对话风格，不使用标题、列表、词汇表或大段教学结构。',
+  '在英语学习场景中，使用先英文、后中文的双语表达, 如果英语表达存在问题，',
+  '希望在自然交流过程中顺带进行纠正，而不是单独讲解语法。',
+  '</communication-preferences>',
+  ''
 ].join('\n')
 
 /** voice 文件的 JSON Schema 表达(供生成 `voice.schema.yaml` 与第三方工具)。 */
