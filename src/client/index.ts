@@ -88,7 +88,7 @@ export function apply(ctx: ClientContext): void {
       const current = state.current
       if (current === undefined) return undefined
       const summary = state.byId[current]
-      return summary === undefined ? undefined : { id: current, blank: summary.blank }
+      return summary === undefined ? undefined : { id: current, cwd: summary.cwd, blank: summary.blank }
     },
   )
 

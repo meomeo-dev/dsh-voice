@@ -168,7 +168,7 @@ hero 菜单项复用了 header 的 `VoiceSettingDialog`，但 `session` 行语�
 镜像 `ui-agent-preset` 的 `AgentPresetSeatController`（`stage` / `select` / `apply` 同构）：
 
 - `stage(voiceId)` 只暂存；`select(voiceId)` = `stage` + 立即 `apply`。
-- `apply()`：当 `sessions.list` 的 current 会话存在且 `blank`（没跑过 turn）时，`POST /voice/set { sessionId, level:'session', voiceId }` 写为 session 级，然后消费暂存；若 current 已非 blank（历史早于选择）则丢弃暂存、拒绝覆盖。
+- `apply()`：当 `sessions.list` 的 current 会话存在且 `blank`（没跑过 turn）时，`POST /voice/set { sessionId, cwd, level:'session', voiceId }` 写为 session 级，然后消费暂存；若 current 已非 blank（历史早于选择）则保留暂存，等待后续真正的空白 session，拒绝覆盖已有历史。
 - `select()` 的立即 `apply` 覆盖「hero 屏就是一个已 current 的空白会话」的情形——此时发送首条消息只会把它翻为非 blank、**不引入新 session id**，单靠 list-change applier 会因 `!blank` 丢弃选择。list-change applier（`sessions.list.subscribe`）仍保留，覆盖「会话稍后才出现」的情形。
 
 ### 10.4 与 dsh-voice-tts 的共存

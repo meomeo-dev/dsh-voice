@@ -16,6 +16,8 @@ import type { VoiceLevel } from './api.ts'
 export interface HeroVoiceSession {
   /** 暂存选择要落到的新会话 id。 */
   readonly id: SessionId
+  /** 新会话所属工作目录,用于校验项目级 voice。 */
+  readonly cwd: string | undefined
   /** false 表示会话已跑过 turn——之后拒绝写入。 */
   readonly blank: boolean
 }
@@ -77,13 +79,10 @@ export class HeroVoiceSeatController {
     const staged = this.staged
     const session = this.currentSession()
     if (staged === undefined || session === undefined) return
-    // 会话已跑过 turn，其历史在自身组合下产生；拒绝覆盖，暂存不再有意义。
-    if (!session.blank) {
-      this.staged = undefined
-      return
-    }
+    // 已运行会话不是 next-session 的目标;保留暂存,等待后续空白会话。
+    if (!session.blank) return
     try {
-      await this.setVoice(session.id, undefined, 'session', staged)
+      await this.setVoice(session.id, session.cwd, 'session', staged)
     } finally {
       // 无论成败都消费暂存（镜像 AgentPresetSeatController：失败也不滞留，
       // 用户重选即可）；在 await 之后清除，保证并发 apply 幂等。
