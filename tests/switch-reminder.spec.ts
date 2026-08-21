@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import type { UserMessage } from '@deepseek-ai/dsh-llm'
 import { injectSwitchReminder, switchReminderFor } from '../src/switch-reminder.ts'
 import type { VoiceFile } from '../src/voice-schema.ts'
@@ -34,11 +35,39 @@ describe('switchReminderFor', () => {
 describe('injectSwitchReminder', () => {
   it('injects a user-role message carrying the reminder text', () => {
     const injected: UserMessage[] = []
-    const agent = { inject: (message: UserMessage) => { injected.push(message) } }
+    const agent = {
+      inbox: { nextStep: [], replace: () => false },
+      inject: (message: UserMessage) => { injected.push(message) },
+    }
     injectSwitchReminder(agent as never, base)
     expect(injected).toHaveLength(1)
     expect(injected[0]!.role).toBe('user')
     expect(injected[0]!.source).toEqual({ kind: 'plugin', plugin: 'dsh-voice' })
     expect(injected[0]!.content).toEqual([{ type: 'text', text: switchReminderFor(base) }])
+  })
+
+  it('replaces an earlier pending reminder instead of appending another one', () => {
+    const pending = createUserMessage({
+      content: [{ type: 'text', text: '<reminder>old</reminder>' }],
+      source: { kind: 'plugin', plugin: 'dsh-voice' },
+    })
+    const replacement = { replaced: '', message: undefined as UserMessage | undefined }
+    const agent = {
+      inbox: {
+        nextStep: [pending],
+        replace: (id: string, message: UserMessage) => {
+          if (id !== pending.id) return false
+          replacement.replaced = id
+          replacement.message = message
+          return true
+        },
+      },
+      inject: () => { throw new Error('must not append while a reminder is pending') },
+    }
+
+    injectSwitchReminder(agent as never, base)
+
+    expect(replacement.replaced).toBe(pending.id)
+    expect(replacement.message?.content).toEqual([{ type: 'text', text: switchReminderFor(base) }])
   })
 })
